@@ -1,15 +1,16 @@
 {
-  "name": "starter-node-project-basic",
-  "private": true,
-  "version": "1.0.0",
-  "main": "src/index.ts",
+  "name": "tiny-event-sourcing",
+  "version": "0.1.0",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "license": "MIT",
   "scripts": {
-    "start": "nodemon -e ts -w src --exec babel-node --extensions .ts src/index.ts"
+    "build": "tsc",
+    "build:watch": "tsc --watch"
   },
   "devDependencies": {
-    "@babel/node": "^7.10.5",
-    "@babel/preset-env": "^7.10.4",
-    "@babel/preset-typescript": "^7.10.4",
+    "@types/ndjson": "^1.5.0",
+    "@types/throttle-debounce": "^2.1.0",
     "@types/jest": "^26.0.5",
     "@types/node": "^14.0.23",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
@@ -22,6 +23,11 @@
     "prettier": "^2.0.5",
     "typescript": "^3.9.7"
   },
+  "dependencies": {
+    "ndjson": "^1.5.0",
+    "sleep-promise": "^8.0.1",
+    "throttle-debounce": "^2.2.1"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
@@ -29,7 +35,7 @@
   },
   "lint-staged": {
     "*.{js,ts}": "eslint --cache --fix",
-    "*.{js,ts,css,md}": "prettier --write"
+    "*.{js,ts,md}": "prettier --write"
   },
   "engines": {
     "node": ">=14"
