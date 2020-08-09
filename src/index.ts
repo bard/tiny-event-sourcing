@@ -22,9 +22,16 @@ export interface Log<DomainEvent> {
 }
 
 const readLog = <DomainEvent>(filename: string): Promise<DomainEvent[]> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const log: DomainEvent[] = []
     createReadStream(filename)
+      .on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'ENOENT') {
+          resolve([])
+        } else {
+          reject(err)
+        }
+      })
       .pipe(ndjson.parse())
       .on('data', (item) => {
         log.push(item)
@@ -94,18 +101,28 @@ const filePersister = <S>(filename: string) => (
   return fs.writeFile(filename, JSON.stringify(state, null, 2), 'utf8')
 }
 
-const fileHydrater = <S>(filename: string) => async (): Promise<
+const fileHydrater = <S>(filename: string, emptyState: S) => async (): Promise<
   StateSnapshot<S>
 > => {
-  return JSON.parse(await fs.readFile(filename, 'utf8'))
+  try {
+    return JSON.parse(await fs.readFile(filename, 'utf8'))
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return { _version: -1, state: emptyState }
+    } else {
+      throw err
+    }
+  }
 }
 
 export const createStateStore = async <S>({
   filename,
+  emptyState,
 }: {
   filename: string
+  emptyState: S
 }): Promise<StateStore<S>> => {
-  const hydrate = fileHydrater<S>(filename)
+  const hydrate = fileHydrater(filename, emptyState)
   const persist = filePersister(filename)
 
   const throttledSave = throttle(1000, persist, false)

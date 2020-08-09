@@ -78,10 +78,12 @@ import { initStateStore } from 'tiny-event-sourcing'
 
 const bookmarksReadModel = await initStateStore<BookmarksReadModel>({
   filename: '/tmp/example/read-model.json',
+  emptyState: { byUrl: {} },
 })
 
 const infoFetcherReadModel = await initStateStore<InfoFetcherReadModel>({
   filename: '/tmp/example/info-fetcher.json',
+  emptyState: {},
 })
 ```
 
