@@ -93,6 +93,9 @@ const infoFetcherReadModel = await initStateStore<InfoFetcherReadModel>({
 import { catchupSubscribe } from 'tiny-event-sourcing'
 import { fetchPageInfo } from 'some-http-library'
 
+// When a "bookmark" event is detected, retrieve page information
+// and trigger an "info" event.
+
 catchupSubscribe(log.events(), async (event) => {
   // Skip already processed events
 
@@ -117,6 +120,9 @@ catchupSubscribe(log.events(), async (event) => {
     infoFetcherReadModel.update(infoFetcherReadModel.getState(), event.index)
   }
 })
+
+// When an "info" event is detected, write to the bookmark
+// read model.
 
 catchupSubscribe(log.events(), async (event) => {
   if (readModel.getVersion() <= event.index) {
