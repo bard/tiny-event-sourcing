@@ -3,6 +3,24 @@
   "version": "0.1.0",
   "main": "build/index.js",
   "types": "build/index.d.ts",
+  "homepage": "https://github.com/bard/tiny-event-sourcing",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bard/tiny-event-sourcing.git"
+  },
+  "author": {
+    "name": "Massimiliano Mirra",
+    "email": "hyperstruct@gmail.com",
+    "url": "https://massimilianomirra.com"
+  },
+  "files": [
+    "build",
+    "src"
+  ],
+  "keywords": [
+    "event", "sourcing", "eventsourcing", "prototyping"
+  ],
+  "description": "Tiny, zero-setup event sourcing implementation geared at prototyping and early data model exploration.",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
@@ -42,5 +60,8 @@
   },
   "engines": {
     "node": ">=14"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   }
 }
