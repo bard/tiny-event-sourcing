@@ -142,6 +142,7 @@ export const createStateStore = async <S>({
       )
     }
 
+    stateSnapshot._version = newVersion
     stateSnapshot.state = newState
     console.log(`State updated to version ${newVersion} [${filename}]`)
 
