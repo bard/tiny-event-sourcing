@@ -18,11 +18,15 @@
     "src"
   ],
   "keywords": [
-    "event", "sourcing", "eventsourcing", "prototyping"
+    "event",
+    "sourcing",
+    "eventsourcing",
+    "prototyping"
   ],
   "description": "Tiny, zero-setup event sourcing implementation geared at prototyping and early data model exploration.",
   "license": "MIT",
   "scripts": {
+    "release": "release-it",
     "build": "tsc",
     "build:watch": "tsc --watch"
   },
@@ -41,6 +45,7 @@
     "lint-staged": ">=10",
     "nodemon": "^2.0.4",
     "prettier": "^2.0.5",
+    "release-it": "^13.6.6",
     "typescript": "^3.9.7"
   },
   "dependencies": {
@@ -63,5 +68,12 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
+  },
+  "release-it": {
+    "git": {
+      "requireBranch": "master",
+      "requireCleanWorkingDir": true,
+      "commitMessage": "ci: release ${version}"
+    }
   }
 }
