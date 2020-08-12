@@ -74,16 +74,20 @@ interface InfoFetcherReadModel {
 ### 4. Initialize state stores for each read model
 
 ```typescript
-import { initStateStore } from 'tiny-event-sourcing'
+import { initStateStore, fsStoreBackend } from 'tiny-event-sourcing'
 
 const bookmarksReadModel = await initStateStore<BookmarksReadModel>({
-  filename: '/tmp/example/read-model.json',
-  emptyState: { byUrl: {} },
+  storeBackend: fsStoreBackend<BoomarksReadModel>(
+    '/tmp/example/read-model.json',
+    { byUrl: {} },
+  ),
 })
 
 const infoFetcherReadModel = await initStateStore<InfoFetcherReadModel>({
-  filename: '/tmp/example/info-fetcher.json',
-  emptyState: {},
+  storeBackend: fsStoreBackend<InfoFetcherModel>(
+    '/tmp/example/info-fetcher.json',
+    {},
+  ),
 })
 ```
 

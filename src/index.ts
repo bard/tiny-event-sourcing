@@ -23,6 +23,12 @@ export interface Log<DomainEvent> {
   append: (event: DomainEvent) => Promise<void>
 }
 
+interface StateStoreBackend<S> {
+  name: string
+  read: () => Promise<StateSnapshot<S>>
+  write: (stateSnapshot: StateSnapshot<S>) => Promise<void>
+}
+
 const readLog = <DomainEvent>(filename: string): Promise<DomainEvent[]> => {
   return new Promise((resolve, reject) => {
     const log: DomainEvent[] = []
@@ -97,38 +103,45 @@ export const initLog = async <DomainEvent>({
   return { events, append }
 }
 
-const filePersister = <S>(filename: string) => (
-  state: StateSnapshot<S>,
-): Promise<void> => {
-  return fs.writeFile(filename, JSON.stringify(state, null, 2), 'utf8')
-}
+export const fsStoreBackend = <S>(
+  filename: string,
+  emptyState: S,
+): StateStoreBackend<S> => {
+  const name = filename
 
-const fileHydrater = <S>(filename: string, emptyState: S) => async (): Promise<
-  StateSnapshot<S>
-> => {
-  try {
-    return JSON.parse(await fs.readFile(filename, 'utf8'))
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return { _version: -1, state: emptyState }
-    } else {
-      throw err
+  const read = async (): Promise<StateSnapshot<S>> => {
+    try {
+      return JSON.parse(await fs.readFile(filename, 'utf8'))
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        return { _version: -1, state: emptyState }
+      } else {
+        throw err
+      }
     }
   }
+
+  const write = throttle(
+    1000,
+    (stateSnapshot: StateSnapshot<S>) => {
+      return fs.writeFile(
+        filename,
+        JSON.stringify(stateSnapshot, null, 2),
+        'utf8',
+      )
+    },
+    false,
+  )
+
+  return { name, read, write }
 }
 
-export const createStateStore = async <S>({
-  filename,
-  emptyState,
+export const initStateStore = async <S>({
+  storeBackend,
 }: {
-  filename: string
-  emptyState: S
+  storeBackend: StateStoreBackend<S>
 }): Promise<StateStore<S>> => {
-  const hydrate = fileHydrater(filename, emptyState)
-  const persist = filePersister(filename)
-
-  const throttledSave = throttle(1000, persist, false)
-  const stateSnapshot: StateSnapshot<S> = await hydrate()
+  const stateSnapshot: StateSnapshot<S> = await storeBackend.read()
 
   const getState = () => stateSnapshot.state
   const update = (newState: S, newVersion: number) => {
@@ -140,15 +153,16 @@ export const createStateStore = async <S>({
 
     if (newVersion <= stateSnapshot._version) {
       throw new Error(
-        `Proposed state version (${newVersion}) is not higher than old state version (${stateSnapshot._version}) [${filename}]`,
+        `[${storeBackend.name}] ` +
+          `Proposed state version (${newVersion}) is not higher than old state version (${stateSnapshot._version})`,
       )
     }
 
     stateSnapshot._version = newVersion
     stateSnapshot.state = newState
-    console.log(`State updated to version ${newVersion} [${filename}]`)
+    console.log(`[${storeBackend.name}] State updated to version ${newVersion}`)
 
-    throttledSave(stateSnapshot)
+    storeBackend.write(stateSnapshot)
   }
 
   const getVersion = () => {
