@@ -12,6 +12,18 @@ At any point in development, you can stop the system, modify the event subscribe
 
 This library lets you quickly structure a prototype around Event Sourcing. It has zero runtime dependencies on other services (saves both log and state snapshots to disk files) and makes no attempt at being suitable for production (read models are kept entirely in memory and there is no log compaction).
 
+## Installation
+
+```sh
+yarn add tiny-event-sourcing
+```
+
+Or:
+
+```sh
+npm install tiny-event-sourcing
+```
+
 ## How to use
 
 The 10000ft view:
