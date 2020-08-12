@@ -3,7 +3,9 @@ import ndjson from 'ndjson'
 import sleep from 'sleep-promise'
 import { throttle } from 'throttle-debounce'
 
-export type Indexed<T> = T & { index: number }
+type Indexed<T> = T & { index: number }
+
+export type EventListener<E> = (event: Indexed<E>) => Promise<void>
 
 export interface StateStore<S> {
   getState: () => S
