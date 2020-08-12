@@ -8,7 +8,7 @@ In the early stages of developing a service, you're probably not sure what data 
 
 The Event Sourcing architecture has a property that is invaluable at this stage: it allows to capture information and delay organizing it until it's needed. Everything that happens in the system is represented as _events_ that are appended to a durable and immutable _log_. _Subscribers_ receive events and build _read models_ based on them. Read models are queried to e.g. present information to the user.
 
-At any point in development, you can stop the system, modify the event subscribers so that they start using a dormant piece of data, replay the log, let subscribers rebuild the read models, and it will be as if **you had known how to use that information since day #1**.
+At any point in development, you can stop the system, modify the event subscribers so that they start using a dormant piece of data, replay the log, let subscribers rebuild the read models, and **it will be as if you had known how to use that information since day #1**.
 
 This library lets you quickly structure a prototype around Event Sourcing. It has zero runtime dependencies on other services (saves both log and state snapshots to disk files) and makes no attempt at being suitable for production (read models are kept entirely in memory and there is no log compaction).
 
