@@ -25,7 +25,7 @@ export interface Log<DomainEvent> {
 
 interface StateStoreBackend<S> {
   name: string
-  read: () => Promise<StateSnapshot<S>>
+  read: () => Promise<StateSnapshot<S> | null>
   write: (stateSnapshot: StateSnapshot<S>) => Promise<void>
 }
 
@@ -103,18 +103,15 @@ export const initLog = async <DomainEvent>({
   return { events, append }
 }
 
-export const fsStoreBackend = <S>(
-  filename: string,
-  emptyState: S,
-): StateStoreBackend<S> => {
+export const fsStoreBackend = <S>(filename: string): StateStoreBackend<S> => {
   const name = filename
 
-  const read = async (): Promise<StateSnapshot<S>> => {
+  const read = async (): Promise<StateSnapshot<S> | null> => {
     try {
       return JSON.parse(await fs.readFile(filename, 'utf8'))
     } catch (err) {
       if (err.code === 'ENOENT') {
-        return { _version: -1, state: emptyState }
+        return null
       } else {
         throw err
       }
@@ -138,10 +135,15 @@ export const fsStoreBackend = <S>(
 
 export const initStateStore = async <S>({
   storeBackend,
+  initialState,
 }: {
   storeBackend: StateStoreBackend<S>
+  initialState: S
 }): Promise<StateStore<S>> => {
-  const stateSnapshot: StateSnapshot<S> = await storeBackend.read()
+  const stateSnapshot: StateSnapshot<S> = (await storeBackend.read()) || {
+    _version: -1,
+    state: initialState,
+  }
 
   const getState = () => stateSnapshot.state
   const update = (newState: S, newVersion: number) => {
